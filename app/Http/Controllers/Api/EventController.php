@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+
+use Illuminate\Routing\Controller;
 use App\Http\Requests\EventRequest;
 use App\Http\Resources\EventResource;
 use App\Http\Traits\CanLoadRelationships;
@@ -13,6 +14,10 @@ class EventController extends Controller
     use CanLoadRelationships;
 
     private array $relations = ['user', 'attendees', 'attendees.user'];
+
+    public function __construct(){
+        $this->middleware('auth:sanctum')->except(['index','show']);
+    }
 
    
     /**
@@ -31,7 +36,7 @@ class EventController extends Controller
     public function store(EventRequest $request)
     {
         $data = $request->validated();
-        $data['user_id'] = 1;
+        $data['user_id'] = $request->user()->id;
         $event = Event::create($data);
         
         return new EventResource($this->loadRelationships($event));
